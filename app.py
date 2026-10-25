@@ -486,7 +486,7 @@ def customer_pay(booking_id):
         # Charge ₹5 for every started hour; minimum one hour.
         duration_seconds = (end_time - start_time).total_seconds()
         hours = max(1, ceil(duration_seconds / 3600))
-        amount = (Decimal(hours) * Decimal("5.00")).quantize(
+        amount = (Decimal(hours) * Decimal("10.00")).quantize(
             Decimal("0.01")
         )
 
@@ -562,7 +562,7 @@ def customer_pay(booking_id):
             "customer_pay.html",
             booking=booking,
             hours=hours,
-            hourly_rate=Decimal("5.00")
+            hourly_rate=Decimal("10.00")
         )
 
     except Exception:
