@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration - Smart Parking</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .register-container {
+            max-width: 420px;
+            margin: 45px auto;
+            padding: 28px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .register-container h1 { text-align: center; }
+        .register-container input {
+            width: 100%;
+            padding: 11px;
+            margin: 7px 0 15px;
+            box-sizing: border-box;
+        }
+        .register-container button {
+            width: 100%;
+            padding: 12px;
+            cursor: pointer;
+        }
+        .message { color: #b91c1c; }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>Create Account</h1>
+        <p style="text-align:center;">Register as a parking customer</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name"
+                   maxlength="100" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   maxlength="150" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone"
+                   maxlength="20" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   minlength="8" required>
+
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password"
+                   name="confirm_password" minlength="8" required>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p style="text-align:center;">
+            Already registered?
+            <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+    </div>
+</body>
+</html>

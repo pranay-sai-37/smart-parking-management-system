@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vehicle - Smart Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { background: #f4f6f9; font-family: Arial, sans-serif; }
+        .container {
+            max-width: 480px; margin: 50px auto; padding: 28px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 4px 18px #00000012;
+        }
+        input, select, button {
+            display: block; width: 100%; box-sizing: border-box;
+            padding: 12px; margin: 10px 0 18px;
+        }
+        button { background: #1d4ed8; color: white; border: 0; cursor: pointer; }
+        .message { background: #e0f2fe; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Your Vehicle</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="vehicle_number">Vehicle Number</label>
+            <input id="vehicle_number" name="vehicle_number"
+                   placeholder="e.g. GJ05AB1234" maxlength="20" required>
+
+            <label for="vehicle_type">Vehicle Type</label>
+            <select id="vehicle_type" name="vehicle_type" required>
+                <option value="car">Car</option>
+                <option value="bike">Bike</option>
+                <option value="suv">SUV</option>
+                <option value="other">Other</option>
+            </select>
+
+            <button type="submit">Add Vehicle</button>
+        </form>
+
+        <a href="{{ url_for('customer') }}">Back to Customer Dashboard</a>
+    </div>
+</body>
+</html>

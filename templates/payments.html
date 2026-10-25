@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payments | SmartPark</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        label { display: block; margin-top: 14px; }
+        input, select, button {
+            padding: 10px;
+            margin-top: 6px;
+            max-width: 100%;
+        }
+        input, select { width: 300px; }
+        button { cursor: pointer; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+<main class="main">
+    <p>
+        <a href="/">Dashboard</a> |
+        <a href="/bookings">Bookings</a> |
+        <a href="/slots">Parking Slots</a>
+    </p>
+
+    <h1>Payment Management</h1>
+    <h2>Total Paid Revenue: ₹{{ "%.2f"|format(total_revenue|float) }}</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+
+    <section class="panel">
+        <h2>Create Payment Record</h2>
+
+        {% if completed_bookings %}
+        <form method="POST">
+            <label>Completed Booking</label>
+            <select name="booking_id" required>
+                <option value="">Select booking</option>
+                {% for b in completed_bookings %}
+                <option value="{{ b.booking_id }}">
+                    #{{ b.booking_id }} — {{ b.full_name }}
+                    ({{ b.vehicle_number }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Amount (₹)</label>
+            <input type="number" name="amount"
+                   min="0" max="99999999.99" step="0.01"
+                   required>
+
+            <label>Payment Method</label>
+            <select name="payment_method" required>
+                <option value="upi">UPI</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+            </select>
+
+            <label>Payment Status</label>
+            <select name="payment_status" required>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+            </select>
+
+            <br><br>
+            <button type="submit">Save Payment</button>
+        </form>
+        {% else %}
+        <p>
+            No completed bookings are available for a new payment record.
+            Complete a booking first.
+        </p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Payment History</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                      <th>Payment ID</th>
+                      <th>Session ID</th>
+                      <th>Booking ID</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>Status</th>
+                      <th>Payment Time</th>
+                      <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                   
+
+                         {% for p in payments %}
+                        <tr>
+                        <td>{{ p.payment_id }}</td>
+                        <td>{{ p.session_id }}</td>
+                        <td>{{ p.booking_id }}</td>
+                        <td>₹{{ "%.2f"|format(p.amount|float) }}</td>
+                        <td>{{ p.payment_method|upper }}</td>
+                        <td>{{ p.payment_status|capitalize }}</td>
+                        <td>{{ p.payment_time or "N/A" }}</td>
+                        <td>
+                           {% if p.payment_status == 'pending' %}
+                           <form
+                               method="POST"
+                               action="{{ url_for('approve_payment', payment_id=p.payment_id) }}"
+                               onsubmit="return confirm('Approve this payment?');"
+                           >
+                              <button type="submit">Approve Payment</button>
+                            </form>
+                            {% elif p.payment_status == 'paid' %}
+                               Approved
+                            {% else %}
+                               —
+                            {% endif %}
+                    </td>
+                </tr>
+                  {% else %}
+                <tr>
+                                <td colspan="8">No payment records yet.</td>
+                             </tr>
+                                 {% endfor %}
+
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

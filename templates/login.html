@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 70px auto;
+            padding: 30px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .login-container h1 { text-align: center; }
+        .login-container input,
+        .login-container select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 16px;
+            box-sizing: border-box;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            cursor: pointer;
+        }
+        .message { color: #b91c1c; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Smart Parking</h1>
+        <p style="text-align:center;">Login to your account</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <label for="role">Login as</label>
+            <select name="role" id="role" required>
+                <option value="customer">Customer</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <label for="email">Email / User ID</label>
+            <input type="text" id="email" name="email"
+                   placeholder="Enter your registered email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p style="text-align:center;">
+            New customer?
+            <a href="{{ url_for('register') }}">Create an account</a>
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking | Admin Dashboard</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <aside class="sidebar">
+        <h2>Smart<span>Park</span></h2>
+        <p class="side-label">ADMIN PANEL</p>
+        <a class="active" href="/">Dashboard</a>
+        <a href="#parking">Parking Overview</a>
+        <a href="#bookings">Bookings</a>
+        <a href="#revenue">Revenue Reports</a>
+        <div class="side-footer">Smart Parking System</div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">PARKING MANAGEMENT</p>
+                <h1>Admin Dashboard</h1>
+                <p class="muted">Monitor your parking facility.</p>
+            </div>
+            <div class="admin-badge">Administrator</div>
+        </header>
+
+        <section class="stats" id="parking">
+            <article class="stat-card">
+                <p>Total Parking Slots</p>
+                <h2>{{ slots.total_slots }}</h2>
+                <span>Registered slots</span>
+            </article>
+            <article class="stat-card">
+                <p>Available Slots</p>
+                <h2>{{ slots.available_slots }}</h2>
+                <span class="green">Ready for parking</span>
+            </article>
+            <article class="stat-card">
+                <p>Occupied Slots</p>
+                <h2>{{ slots.occupied_slots }}</h2>
+                <span class="orange">Currently occupied</span>
+            </article>
+            <article class="stat-card" id="revenue">
+                <p>Total Revenue</p>
+                <h2>₹{{ "%.2f"|format(revenue|float) }}</h2>
+                <span>Paid payments only</span>
+            </article>
+        </section>
+
+        <section class="secondary-stats">
+            <div class="mini-card">
+                <span>Maintenance Slots</span>
+                <strong>{{ slots.maintenance_slots }}</strong>
+            </div>
+            <div class="mini-card">
+                <span>Total Bookings</span>
+                <strong>{{ bookings.total_bookings }}</strong>
+            </div>
+            <div class="mini-card">
+                <span>Active Bookings</span>
+                <strong>{{ bookings.active_bookings }}</strong>
+            </div>
+            <div class="mini-card">
+                <span>Completed Bookings</span>
+                <strong>{{ bookings.completed_bookings }}</strong>
+            </div>
+        </section>
+
+        <section class="panel" id="bookings">
+            <div class="panel-heading">
+                <div>
+                    <h2>Recent Bookings</h2>
+                    <p class="muted">Latest five booking records</p>
+                </div>
+                <span class="live-tag">LIVE DATA</span>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Slot</th>
+                            <th>Start Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in recent_bookings %}
+                        <tr>
+                            <td>#{{ booking.booking_id }}</td>
+                            <td>{{ booking.full_name }}</td>
+                            <td>{{ booking.vehicle_number }}</td>
+                            <td>{{ booking.slot_number }}</td>
+                            <td>{{ booking.start_time }}</td>
+                            <td>
+                                <span class="status {{ booking.status }}">
+                                    {{ booking.status|capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="empty">
+                                No bookings yet. Booking records will appear here.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer>Smart Parking Management System · Admin Panel</footer>
+    </main>
+</body>
+</html>

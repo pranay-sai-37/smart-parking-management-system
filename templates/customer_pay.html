@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Payment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Booking Payment</h1>
+
+         <p><strong>Booking ID:</strong> {{ booking.booking_id }}</p>
+         <p><strong>Hourly Rate:</strong> ₹{{ "%.2f"|format(hourly_rate|float) }}</p>
+          <p><strong>Billable Hours:</strong> {{ hours }}</p>
+          <p><strong>Total Amount:</strong> ₹{{ "%.2f"|format(booking.amount|float) }}</p>
+
+
+        <form method="POST">
+            <label for="payment_method">Payment Method</label>
+
+            <select id="payment_method" name="payment_method" required>
+                <option value="">Select a method</option>
+                <option value="cash">Cash</option>
+                <option value="upi">UPI (Demo)</option>
+                <option value="card">Card (Demo)</option>
+            </select>
+
+            <p>This is a demo. No real money will be transferred.</p>
+
+            <button type="submit">Create Payment Record</button>
+        </form>
+
+        <p><a href="{{ url_for('customer') }}">Back to Dashboard</a></p>
+    </div>
+</body>
+</html>

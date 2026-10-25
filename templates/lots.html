@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parking Lots | SmartPark</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .lot-form, .lot-table {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        .lot-form input {
+            padding: 10px;
+            margin: 8px 8px 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .lot-form button, .delete-button {
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+        .lot-table { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .delete-button { background: #b91c1c; color: white; border: 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <p><a href="/">← Dashboard</a> | <a href="/slots">Manage Slots</a></p>
+        <h1>Parking Lots Management</h1>
+        <p>Add and manage parking locations.</p>
+
+        {% with messages = get_flashed_messages() %}
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        {% endwith %}
+
+        <section class="lot-form">
+            <h2>Add Parking Lot</h2>
+            <form method="POST">
+                <div>
+                    <label>Lot Name</label><br>
+                    <input name="lot_name" placeholder="Main Parking"
+                           required maxlength="100">
+                </div>
+                <div>
+                    <label>Location</label><br>
+                    <input name="location" placeholder="College Campus"
+                           required maxlength="255">
+                </div>
+                <div>
+                    <label>Opening Time</label><br>
+                    <input type="time" name="opening_time" value="06:00"
+                           required>
+                </div>
+                <div>
+                    <label>Closing Time</label><br>
+                    <input type="time" name="closing_time" value="22:00"
+                           required>
+                </div>
+                <button type="submit">Add Parking Lot</button>
+            </form>
+        </section>
+
+        <section class="lot-table">
+            <h2>All Parking Lots</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Location</th>
+                        <th>Opening</th><th>Closing</th>
+                        <th>Total Slots</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lot in lots %}
+                    <tr>
+                        <td>{{ lot.lot_id }}</td>
+                        <td>{{ lot.lot_name }}</td>
+                        <td>{{ lot.location }}</td>
+                        <td>{{ lot.opening_time }}</td>
+                        <td>{{ lot.closing_time }}</td>
+                        <td>{{ lot.total_slots }}</td>
+                        <td>
+                            <form method="POST"
+                                  action="{{ url_for('delete_lot', lot_id=lot.lot_id) }}"
+                                  onsubmit="return confirm('Delete this parking lot?');">
+                                <button class="delete-button" type="submit">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7">No parking lots found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

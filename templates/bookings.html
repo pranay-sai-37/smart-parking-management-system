@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bookings | SmartPark</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .booking-form, .booking-table {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        label { display: block; margin-top: 14px; }
+        input, select, button {
+            padding: 10px;
+            margin-top: 6px;
+            max-width: 100%;
+        }
+        input, select { width: 320px; }
+        button { cursor: pointer; }
+        .booking-table { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+<main class="main">
+    <p>
+        <a href="/">Dashboard</a> |
+        <a href="/lots">Parking Lots</a> |
+        <a href="/slots">Parking Slots</a>
+    </p>
+
+    <h1>Booking Management</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <p>{{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+
+    <section class="booking-form">
+        <h2>Create Booking</h2>
+
+        {% if customers and vehicles and slots %}
+        <form method="POST">
+            <label>Customer</label>
+            <select name="user_id" required>
+                <option value="">Select customer</option>
+                {% for customer in customers %}
+                <option value="{{ customer.user_id }}">
+                    {{ customer.full_name }} ({{ customer.email }})
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Vehicle</label>
+            <select name="vehicle_id" required>
+                <option value="">Select vehicle</option>
+                {% for vehicle in vehicles %}
+                <option value="{{ vehicle.vehicle_id }}">
+                    {{ vehicle.vehicle_number }} — {{ vehicle.vehicle_type|capitalize }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Parking Slot</label>
+            <select name="slot_id" required>
+                <option value="">Select available slot</option>
+                {% for slot in slots %}
+                <option value="{{ slot.slot_id }}">
+                    {{ slot.slot_number }} — {{ slot.slot_type|capitalize }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Start Time</label>
+            <input type="datetime-local" name="start_time" required>
+
+            <label>End Time</label>
+            <input type="datetime-local" name="end_time" required>
+
+            <br><br>
+            <button type="submit">Create Booking</button>
+        </form>
+        {% else %}
+        <p>
+            Booking create karne se pehle database mein customer,
+            uska vehicle aur available parking slot hona zaroori hai.
+            Customer ka role 'customer' hona chahiye.
+        </p>
+        {% endif %}
+    </section>
+
+    <section class="booking-table">
+        <h2>All Bookings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Vehicle</th>
+                    <th>Parking Lot</th>
+                    <th>Slot</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td>{{ b.booking_id }}</td>
+                    <td>{{ b.full_name }}</td>
+                    <td>{{ b.vehicle_number }}</td>
+                    <td>{{ b.lot_name }}</td>
+                    <td>{{ b.slot_number }}</td>
+                    <td>{{ b.start_time }}</td>
+                    <td>{{ b.end_time }}</td>
+                    
+                    <td>{{ b.status|capitalize }}</td>
+<td>
+    {% if b.status == 'booked' %}
+    <form method="POST"
+          action="{{ url_for('update_booking_status', booking_id=b.booking_id) }}">
+        <select name="status" required>
+            <option value="active">Mark Active</option>
+            <option value="cancelled">Cancel</option>
+        </select>
+        <button type="submit">Update</button>
+    </form>
+
+    {% elif b.status == 'active' %}
+    <form method="POST"
+          action="{{ url_for('update_booking_status', booking_id=b.booking_id) }}">
+        <select name="status" required>
+            <option value="completed">Complete</option>
+            <option value="cancelled">Cancel</option>
+        </select>
+        <button type="submit">Update</button>
+    </form>
+
+    {% else %}
+    <span>Finished</span>
+    {% endif %}
+</td>
+
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">No bookings available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,402 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Smart Parking</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            font-family: Arial, sans-serif;
+            color: #172033;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        header h2 {
+            margin: 0 0 8px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 0 18px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            margin-bottom: 22px;
+        }
+
+        input, select, button {
+            padding: 11px;
+            margin: 6px 0 12px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #1d4ed8;
+            color: white;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .cancel-button {
+            background: #dc2626;
+            margin: 0;
+        }
+
+        .cancel-button:hover {
+            background: #b91c1c;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 13px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .message {
+            padding: 12px;
+            background: #e0f2fe;
+            border-radius: 6px;
+        }
+
+        .logout {
+            color: white;
+        }
+
+        .add-vehicle {
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .empty-message {
+            color: #64748b;
+            padding: 12px 0;
+        }
+
+        .status {
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        @media (max-width: 600px) {
+            .panel {
+                padding: 16px;
+            }
+
+            main {
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h2>Smart Parking</h2>
+        <span>Welcome, {{ session.get('user_name', 'Customer') }}</span>
+    </div>
+
+    <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+</header>
+
+<main>
+
+    <h1>Customer Dashboard</h1>
+    <p>Manage your vehicles, book parking slots and view your payment history.</p>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="message">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+
+    <!-- BOOK PARKING -->
+    <section class="panel">
+        <h2>Book a Parking Slot</h2>
+
+        <a class="add-vehicle"
+           href="{{ url_for('customer_vehicles') }}">
+            + Add Your Vehicle
+        </a>
+
+        {% if vehicles %}
+
+            {% if slots %}
+
+            <form method="POST"
+                  action="{{ url_for('customer_book') }}">
+
+                <label for="vehicle_id">Your Vehicle</label>
+                <select id="vehicle_id" name="vehicle_id" required>
+                    {% for vehicle in vehicles %}
+                    <option value="{{ vehicle.vehicle_id }}">
+                        {{ vehicle.vehicle_number }}
+                        ({{ vehicle.vehicle_type }})
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <label for="slot_id">Available Parking Slot</label>
+                <select id="slot_id" name="slot_id" required>
+                    {% for slot in slots %}
+                    <option value="{{ slot.slot_id }}">
+                        {{ slot.lot_name }} —
+                        {{ slot.slot_number }}
+                        ({{ slot.slot_type }})
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <label for="start_time">Start Time</label>
+                <input
+                    id="start_time"
+                    type="datetime-local"
+                    name="start_time"
+                    required
+                >
+
+                <label for="end_time">End Time</label>
+                <input
+                    id="end_time"
+                    type="datetime-local"
+                    name="end_time"
+                    required
+                >
+
+                <button type="submit">Confirm Booking</button>
+            </form>
+
+            {% else %}
+                <p class="empty-message">
+                    No parking slots are currently available.
+                    Please check again later.
+                </p>
+            {% endif %}
+
+        {% else %}
+            <p class="empty-message">
+                No vehicles are registered to your account yet.
+                Add a vehicle first.
+            </p>
+        {% endif %}
+    </section>
+
+
+    <!-- MY BOOKINGS -->
+    <section class="panel">
+        <h2>My Bookings</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Action</th>
+                        <th>Vehicle</th>
+                        <th>Parking Slot</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.booking_id }}</td>
+
+                        <td>
+                            {% if booking.status == 'booked' %}
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'cancel_customer_booking',
+                                    booking_id=booking.booking_id
+                                ) }}"
+                                onsubmit="return confirm('Cancel this booking?');"
+                            >
+                                <button
+                                    type="submit"
+                                    class="cancel-button"
+                                >
+                                    Cancel
+                                </button>
+                            </form>
+                            
+                            {% elif booking.status == 'completed' %}
+                                <a
+                                    href="{{ url_for(
+                                        'customer_pay',
+                                        booking_id=booking.booking_id
+                                    ) }}"
+                                    class="pay-button"
+                                >
+                                    Pay
+                                </a>
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                        <td>{{ booking.vehicle_number }}</td>
+                        <td>{{ booking.slot_number }}</td>
+                        <td>{{ booking.start_time }}</td>
+                        <td>{{ booking.end_time }}</td>
+                        <td class="status">{{ booking.status }}</td>
+                    </tr>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="7">You have no bookings yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    
+<h2>My Payment Summary</h2>
+
+<div class="summary-container">
+
+    <div class="summary-card">
+        <h3>Total Amount Paid</h3>
+        
+      <p>₹{{ "%.2f"|format(payment_summary['total_paid']|float) }}</p>
+
+    </div>
+
+    <div class="summary-card">
+        <h3>Successful Payments</h3>
+        
+       <p>{{ payment_summary['paid_count'] }}</p>
+
+    </div>
+
+    <div class="summary-card">
+        <h3>Pending Payments</h3>
+        
+       <p>{{ payment_summary['pending_count'] }}</p>
+
+    </div>
+
+</div>
+
+
+
+    <!-- MY PAYMENT HISTORY -->
+    <section class="panel">
+        <h2>My Payment History</h2>
+        <p>View your recorded payments and their status.</p>
+
+        {% if payment_history %}
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Booking ID</th>
+                        <th>Parking Lot</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Payment Status</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    
+                        {% for p in payment_history %}
+                          <tr>
+                          <td>{{ p.payment_id }}</td>
+                          <td>{{ p.booking_id }}</td>
+                          <td>{{ p.lot_name }}</td>
+                          <td>₹{{ "%.2f"|format(p.amount|float) }}</td>
+                          <td>{{ p.payment_method|upper }}</td>
+                          <td class="status">{{ p.payment_status|title }}</td>
+                          <td>{{ p.payment_time or "N/A" }}</td>
+                        </tr>
+                          {% endfor %}
+
+                    
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+            <p class="empty-message">
+                You have no payment history yet.
+            </p>
+        {% endif %}
+    </section>
+
+</main>
+
+</body>
+</html>
+```
